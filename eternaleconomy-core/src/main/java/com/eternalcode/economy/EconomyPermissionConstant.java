@@ -7,6 +7,9 @@ public class EconomyPermissionConstant {
     public static final String ADMIN_ADD_PERMISSION = "eternaleconomy.admin.add";
     public static final String ADMIN_REMOVE_PERMISSION = "eternaleconomy.admin.remove";
     public static final String ADMIN_SET_PERMISSION = "eternaleconomy.admin.set";
+    public static final String ADMIN_CREATE_PERMISSION = "eternaleconomy.admin.create";
+    public static final String ADMIN_DELETE_PERMISSION = "eternaleconomy.admin.delete";
+    public static final String ADMIN_CLEANUPDB_PERMISSION = "eternaleconomy.admin.cleanupdb";
     public static final String ADMIN_RELOAD_PERMISSION = "eternaleconomy.admin.reload";
 
     public static final String PLAYER_BALANCE_PERMISSION = "eternaleconomy.player.balance";

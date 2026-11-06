@@ -8,6 +8,8 @@ import com.eternalcode.economy.account.Account;
 import com.eternalcode.economy.account.AccountController;
 import com.eternalcode.economy.account.AccountManager;
 import com.eternalcode.economy.account.AccountPaymentService;
+import com.eternalcode.economy.account.MojangApiClient;
+import com.eternalcode.economy.account.PlayerUuidResolver;
 import com.eternalcode.economy.account.database.AccountRepository;
 import com.eternalcode.economy.account.database.AccountRepositoryImpl;
 import com.eternalcode.economy.bridge.BridgeManager;
@@ -22,6 +24,9 @@ import com.eternalcode.economy.command.impl.MoneyTransferCommand;
 import com.eternalcode.economy.command.impl.WithdrawCommand;
 import com.eternalcode.economy.command.impl.admin.AdminAddCommand;
 import com.eternalcode.economy.command.impl.admin.AdminBalanceCommand;
+import com.eternalcode.economy.command.impl.admin.AdminCleanupDbCommand;
+import com.eternalcode.economy.command.impl.admin.AdminCreateCommand;
+import com.eternalcode.economy.command.impl.admin.AdminDeleteCommand;
 import com.eternalcode.economy.command.impl.admin.AdminRemoveCommand;
 import com.eternalcode.economy.command.impl.admin.AdminResetCommand;
 import com.eternalcode.economy.command.impl.admin.AdminSetCommand;
@@ -181,6 +186,11 @@ public class EconomyBukkitPlugin extends JavaPlugin {
                 new AdminSetCommand(
                     accountPaymentService, decimalFormatter,
                     noticeService),
+                new AdminCreateCommand(
+                    accountManager, new PlayerUuidResolver(accountManager, server),
+                    new MojangApiClient(), this),
+                new AdminDeleteCommand(accountManager, this),
+                new AdminCleanupDbCommand(accountManager, this),
                 new AdminResetCommand(accountPaymentService, noticeService),
                 new AdminBalanceCommand(noticeService, decimalFormatter),
                 new WithdrawCommand(

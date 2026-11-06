@@ -5,8 +5,10 @@ import com.eternalcode.economy.config.implementation.PluginConfig;
 import com.eternalcode.economy.leaderboard.LeaderboardService;
 import com.eternalcode.economy.leaderboard.LeaderboardServiceImpl;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -260,6 +262,51 @@ public class AccountManager {
 
         this.accountByUniqueId.put(account.uuid(), account);
         this.accountByName.put(account.name(), account);
+    }
+
+
+    public CompletableFuture<Boolean> deleteAccount(Account account) {
+        return this.accountsLoaded.thenCompose(ignored -> {
+            synchronized (this.creationLock) {
+                Account current = this.accountByUniqueId.get(account.uuid());
+                if (current == null || current.balance().compareTo(account.balance()) != 0) {
+                    return CompletableFuture.completedFuture(false);
+                }
+
+                return this.accountRepository.delete(current).thenApply(result -> {
+                    synchronized (this.creationLock) {
+                        Account cached = this.accountByUniqueId.get(current.uuid());
+                        if (cached != null && cached.balance().compareTo(current.balance()) == 0) {
+                            this.accountByUniqueId.remove(current.uuid());
+                            this.accountByName.remove(current.name());
+                            this.leaderboardService.invalidateCache();
+                        }
+                    }
+                    return true;
+                });
+            }
+        });
+    }
+
+    public CompletableFuture<List<Account>> cleanupZeroBalanceAccounts() {
+        return this.accountsLoaded.thenCompose(ignored -> {
+            List<Account> candidates = this.getAccounts().stream()
+                .filter(account -> account.balance().compareTo(BigDecimal.ZERO) == 0)
+                .toList();
+            List<Account> deleted = new ArrayList<>();
+            CompletableFuture<Void> cleanup = CompletableFuture.completedFuture(null);
+
+            for (Account account : candidates) {
+                cleanup = cleanup.thenCompose(result -> this.deleteAccount(account)
+                    .thenAccept(wasDeleted -> {
+                        if (wasDeleted) {
+                            deleted.add(account);
+                        }
+                    }));
+            }
+
+            return cleanup.thenApply(result -> List.copyOf(deleted));
+        });
     }
 
     public Collection<Account> getAccountStartingWith(String prefix) {
