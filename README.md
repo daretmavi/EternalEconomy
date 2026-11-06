@@ -54,7 +54,10 @@
 | `/economy remove <player> <amount>` | `/eco remove` | `eternaleconomy.admin.remove` | Removes money from a player. |
 | `/economy set <player> <amount>` | `/eco set` | `eternaleconomy.admin.set` | Sets a player's balance. |
 | `/economy set <player> 0` | `/eco set <player> 0` | `eternaleconomy.admin.set` | Sets a player's balance to zero. |
-| `/economy reset <player>` | `/eco reset` | `eternaleconomy.admin.reset` | Resets balance to the configured default. |
+| `/economy create <player> [uuid\|offline\|online]` | `/eco create` | `eternaleconomy.admin.create` | Creates an economy account with a zero balance. The optional argument selects an explicit UUID, an offline UUID, or an online UUID resolved through Mojang; when omitted, the local UUID resolver is used. |
+| `/economy delete <player> <UUID> [confirm]` | `/eco delete` | `eternaleconomy.admin.delete` | Deletes the player's economy account by name and UUID. A non-zero balance requires repeating the command with `confirm`. |
+| `/economy cleanupdb` | `/eco cleanupdb` | `eternaleconomy.admin.cleanupdb` | Deletes all economy accounts with a zero balance and lists each deleted account's name and UUID. |
+| `/economy reset <player>` | `/eco reset` | `eternaleconomy.admin.reset` | Resets the player's balance to the configured default. |
 | `/economy reload` | - | `eternaleconomy.admin.reload` | Reloads plugin configuration. |
 
 ## Permissions
@@ -70,6 +73,9 @@
 | `eternaleconomy.admin.add` | Add balance. |
 | `eternaleconomy.admin.remove` | Remove balance. |
 | `eternaleconomy.admin.set` | Set balance. |
+| `eternaleconomy.admin.create` | Create economy accounts. |
+| `eternaleconomy.admin.delete` | Delete an economy account by player name and UUID. |
+| `eternaleconomy.admin.cleanupdb` | Delete all zero-balance economy accounts. |
 | `eternaleconomy.admin.reset` | Reset balance. |
 | `eternaleconomy.admin.reload` | Reload configuration. |
 
