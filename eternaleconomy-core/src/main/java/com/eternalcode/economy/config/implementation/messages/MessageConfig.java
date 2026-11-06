@@ -10,7 +10,7 @@ public class MessageConfig extends OkaeriConfig {
     public Notice positiveNumberRequired = Notice.chat(
         "<b><gradient:#00FFA2:#34AE00>ECONOMY</gradient></b> <dark_gray>➤</dark_gray> <white>Invalid '{AMOUNT}' value, positive number required!</white>");
     public Notice invalidPlayer = Notice.chat(
-        "<b><gradient:#00FFA2:#34AE00>ECONOMY</gradient></b> <dark_gray>➤</dark_gray> <white>Invalid player, please provide a valid player.</white>");
+        "<b><gradient:#00FFA2:#34AE00>ECONOMY</gradient></b> <dark_gray>➤</dark_gray> <white>Player account not found. The player must join the server first, or you can use /economy set to create an account.</white>");
     public Notice notSender = Notice.chat(
         "<b><gradient:#00FFA2:#34AE00>ECONOMY</gradient></b> <dark_gray>➤</dark_gray> <white>You cannot perform this action on yourself.</white>");
 
