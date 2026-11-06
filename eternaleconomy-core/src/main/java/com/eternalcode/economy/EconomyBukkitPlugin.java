@@ -24,7 +24,9 @@ import com.eternalcode.economy.command.impl.MoneyTransferCommand;
 import com.eternalcode.economy.command.impl.WithdrawCommand;
 import com.eternalcode.economy.command.impl.admin.AdminAddCommand;
 import com.eternalcode.economy.command.impl.admin.AdminBalanceCommand;
+import com.eternalcode.economy.command.impl.admin.AdminCleanupDbCommand;
 import com.eternalcode.economy.command.impl.admin.AdminCreateCommand;
+import com.eternalcode.economy.command.impl.admin.AdminDeleteCommand;
 import com.eternalcode.economy.command.impl.admin.AdminRemoveCommand;
 import com.eternalcode.economy.command.impl.admin.AdminResetCommand;
 import com.eternalcode.economy.command.impl.admin.AdminSetCommand;
@@ -84,7 +86,6 @@ public class EconomyBukkitPlugin extends JavaPlugin {
     public void onEnable() {
         Stopwatch started = Stopwatch.createStarted();
         Server server = this.getServer();
-
         new Metrics(this, BSTATS_PLUGIN_ID);
 
         MiniMessage miniMessage = MiniMessage.builder()
@@ -96,15 +97,12 @@ public class EconomyBukkitPlugin extends JavaPlugin {
         File dataFolder = this.getDataFolder();
 
         ConfigService configService = new ConfigService();
-
         MessageConfig messageConfig = configService.create(
             MessageConfig.class,
             new File(dataFolder, "messages.yml"));
-
         PluginConfig pluginConfig = configService.create(
             PluginConfig.class,
             new File(dataFolder, "config.yml"));
-
         CommandsConfig commandsConfig = configService.create(
             CommandsConfig.class,
             new File(dataFolder, "commands.yml"));
@@ -127,17 +125,12 @@ public class EconomyBukkitPlugin extends JavaPlugin {
             this.getLogger());
 
         DecimalFormatter decimalFormatter = new DecimalFormatterImpl(pluginConfig);
-
         AccountPaymentService accountPaymentService = new AccountPaymentService(accountManager, pluginConfig);
-
-        PlayerUuidResolver playerUuidResolver = new PlayerUuidResolver(accountManager, server);
-        MojangApiClient mojangApiClient = new MojangApiClient();
 
         WithdrawItemServiceImpl withdrawItemServiceImpl = new WithdrawItemServiceImpl(
             this, pluginConfig,
             decimalFormatter,
             miniMessage);
-
         WithdrawService withdrawService = new WithdrawService(
             server,
             noticeService,
@@ -194,10 +187,10 @@ public class EconomyBukkitPlugin extends JavaPlugin {
                     accountPaymentService, decimalFormatter,
                     noticeService),
                 new AdminCreateCommand(
-                    accountManager,
-                    playerUuidResolver,
-                    mojangApiClient,
-                    this),
+                    accountManager, new PlayerUuidResolver(accountManager, server),
+                    new MojangApiClient(), this),
+                new AdminDeleteCommand(accountManager, this),
+                new AdminCleanupDbCommand(accountManager, this),
                 new AdminResetCommand(accountPaymentService, noticeService),
                 new AdminBalanceCommand(noticeService, decimalFormatter),
                 new WithdrawCommand(
@@ -233,7 +226,6 @@ public class EconomyBukkitPlugin extends JavaPlugin {
         server.getPluginManager().registerEvents(
             new WithdrawController(withdrawService, withdrawItemServiceImpl),
             this);
-
         server.getPluginManager().registerEvents(
             new WithdrawAnvilController(withdrawItemServiceImpl, noticeService),
             this);
@@ -245,11 +237,9 @@ public class EconomyBukkitPlugin extends JavaPlugin {
             server,
             this.getLogger(),
             scheduler);
-
         bridgeManager.init();
 
         Duration elapsed = started.elapsed();
-
         server.getLogger().info(String.format(PLUGIN_STARTED, elapsed.toMillis()));
     }
 

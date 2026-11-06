@@ -18,7 +18,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
 @Command(name = "economy create", aliases = "eco create")
-@Permission(EconomyPermissionConstant.ADMIN_SET_PERMISSION)
+@Permission(EconomyPermissionConstant.ADMIN_CREATE_PERMISSION)
 public class AdminCreateCommand {
 
     private static final BigDecimal INITIAL_BALANCE = BigDecimal.ZERO;
