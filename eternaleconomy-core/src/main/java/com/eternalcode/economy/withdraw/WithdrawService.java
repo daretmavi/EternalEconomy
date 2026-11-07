@@ -6,10 +6,13 @@ import com.eternalcode.economy.account.AccountPaymentService;
 import com.eternalcode.economy.format.DecimalFormatter;
 import com.eternalcode.economy.multification.NoticeService;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public class WithdrawService {
@@ -61,7 +64,24 @@ public class WithdrawService {
             return;
         }
 
-        if (player.getInventory().firstEmpty() == -1) {
+        List<ItemStack> banknotes = this.withdrawItemService.createBanknotes(value, player.getName());
+        Inventory inventory = player.getInventory();
+        ItemStack[] simulatedContents = inventory.getStorageContents();
+
+        for (int i = 0; i < simulatedContents.length; i++) {
+            if (simulatedContents[i] != null) {
+                simulatedContents[i] = simulatedContents[i].clone();
+            }
+        }
+
+        Inventory simulatedInventory = Bukkit.createInventory(null, simulatedContents.length);
+        simulatedInventory.setStorageContents(simulatedContents);
+
+        ItemStack[] simulatedBanknotes = banknotes.stream()
+            .map(ItemStack::clone)
+            .toArray(ItemStack[]::new);
+
+        if (!simulatedInventory.addItem(simulatedBanknotes).isEmpty()) {
             this.noticeService.create()
                 .notice(messageConfig -> messageConfig.withdraw.noInventorySpace)
                 .player(player.getUniqueId())
@@ -69,8 +89,7 @@ public class WithdrawService {
             return;
         }
 
-        ItemStack banknote = this.withdrawItemService.createBanknote(value, player.getName());
-        player.getInventory().addItem(banknote);
+        inventory.addItem(banknotes.toArray(new ItemStack[0]));
 
         this.accountPaymentService.removeBalance(account, value);
 
