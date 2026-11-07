@@ -1,6 +1,7 @@
 package com.eternalcode.economy.config.implementation;
 
 import com.eternalcode.economy.config.item.ConfigItem;
+import com.eternalcode.economy.config.item.ExactWithdrawItemEntry;
 import com.eternalcode.economy.config.item.WithdrawItemEntry;
 import com.eternalcode.economy.database.DatabaseConfig;
 import com.eternalcode.economy.format.DecimalUnit;
@@ -118,6 +119,67 @@ public class PluginConfig extends OkaeriConfig {
                     ))
                     .withMaterial(Material.PAPER)
                     .withTexture(100)
+                    .withGlow(true)
+                    .build()));
+
+        @Comment({
+            "Enable exact-item system: withdraws the requested amount using exact denominations",
+            "This setting is ignored when multiItemEnabled is true"
+        })
+        public boolean exactItemEnabled = false;
+
+        @Comment({
+            "Item configurations for exact banknote denominations",
+            "The system combines these values to match the requested withdraw amount",
+            "Placeholders: {VALUE}, {PLAYER}"
+        })
+        public List<ExactWithdrawItemEntry> exactItemEntries = List.of(
+            new ExactWithdrawItemEntry(
+                BigDecimal.ONE,
+                ConfigItem.builder()
+                    .withName("<white>Coin worth <green>{VALUE}$")
+                    .withLore(List.of(
+                        "<gray>Created by <white>{PLAYER}",
+                        "<gray>Right click to redeem"
+                    ))
+                    .withMaterial(Material.GOLD_NUGGET)
+                    .withTexture(1)
+                    .withGlow(false)
+                    .build()),
+            new ExactWithdrawItemEntry(
+                BigDecimal.TEN,
+                ConfigItem.builder()
+                    .withName("<white>Coin worth <green>{VALUE}$")
+                    .withLore(List.of(
+                        "<gray>Created by <white>{PLAYER}",
+                        "<gray>Right click to redeem"
+                    ))
+                    .withMaterial(Material.GOLD_NUGGET)
+                    .withTexture(10)
+                    .withGlow(false)
+                    .build()),
+            new ExactWithdrawItemEntry(
+                BigDecimal.valueOf(100),
+                ConfigItem.builder()
+                    .withName("<white>Banknote worth <green>{VALUE}$")
+                    .withLore(List.of(
+                        "<gray>Created by <white>{PLAYER}",
+                        "<gray>Right click to redeem"
+                    ))
+                    .withMaterial(Material.PAPER)
+                    .withTexture(100)
+                    .withGlow(true)
+                    .build()),
+            new ExactWithdrawItemEntry(
+                BigDecimal.valueOf(1000),
+                ConfigItem.builder()
+                    .withName("<white>Banknote worth <green>{VALUE}$")
+                    .withLore(List.of(
+                        "<gray>Created by <white>{PLAYER}",
+                        "<gray>Right click to redeem"
+                    ))
+                    .withMaterial(Material.PAPER)
+                    .withTexture(1000)
                     .withGlow(true)
                     .build()));
     }
