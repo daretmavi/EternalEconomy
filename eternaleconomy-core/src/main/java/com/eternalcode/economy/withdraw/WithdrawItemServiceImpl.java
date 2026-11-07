@@ -57,53 +57,7 @@ public class WithdrawItemServiceImpl implements WithdrawItemService {
 
     @Override
     public ItemStack createBanknote(BigDecimal value, String creatorName) {
-        if (value.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Banknote value must be positive, got: " + value);
-        }
-
-        ConfigItem configItem = this.selectConfigItem(value);
-        String formattedValue = this.moneyFormatter.format(value);
-
-        ItemStack itemStack = new ItemStack(configItem.material());
-
-        itemStack.editMeta(meta -> {
-            if (configItem.texture() != null) {
-                meta.setCustomModelData(configItem.texture());
-            }
-
-            Component name = this.miniMessage.deserialize(
-                this.replaceBanknotePlaceholders(configItem.name(), formattedValue, creatorName),
-                EMPTY_RESOLVER
-            ).decoration(TextDecoration.ITALIC, false);
-
-            meta.displayName(name);
-
-            if (!configItem.lore().isEmpty()) {
-                List<Component> lore = new ArrayList<>(configItem.lore().size());
-                for (String line : configItem.lore()) {
-                    lore.add(
-                        this.miniMessage.deserialize(
-                            this.replaceBanknotePlaceholders(line, formattedValue, creatorName),
-                            EMPTY_RESOLVER
-                        ).decoration(TextDecoration.ITALIC, false)
-                    );
-                }
-                meta.lore(lore);
-            }
-
-            if (configItem.glow()) {
-                meta.addEnchant(this.glowEnchantment, 1, true);
-                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            }
-
-            meta.getPersistentDataContainer().set(
-                this.banknoteValueKey,
-                PersistentDataType.STRING,
-                value.toPlainString()
-            );
-        });
-
-        return itemStack;
+        return this.createBanknote(value, creatorName, this.selectConfigItem(value));
     }
 
     @Override
