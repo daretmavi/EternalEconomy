@@ -107,6 +107,13 @@ public class EconomyBukkitPlugin extends JavaPlugin {
             CommandsConfig.class,
             new File(dataFolder, "commands.yml"));
 
+        if (pluginConfig.withdraw.multiItemEnabled && pluginConfig.withdraw.exactItemEnabled) {
+            this.getLogger().warning(
+                "Both withdraw.multiItemEnabled and withdraw.exactItemEnabled are enabled. "
+                    + "The multi-item system takes priority."
+            );
+        }
+
         NoticeService noticeService = new NoticeService(messageConfig, miniMessage);
 
         this.skullAPI = LiteSkullFactory.builder()
