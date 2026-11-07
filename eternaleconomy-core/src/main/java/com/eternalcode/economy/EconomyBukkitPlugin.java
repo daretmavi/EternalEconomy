@@ -142,6 +142,7 @@ public class EconomyBukkitPlugin extends JavaPlugin {
             server,
             noticeService,
             decimalFormatter,
+            pluginConfig,
             withdrawItemServiceImpl,
             accountPaymentService,
             accountManager);

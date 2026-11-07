@@ -3,6 +3,7 @@ package com.eternalcode.economy.withdraw;
 import com.eternalcode.economy.account.Account;
 import com.eternalcode.economy.account.AccountManager;
 import com.eternalcode.economy.account.AccountPaymentService;
+import com.eternalcode.economy.config.implementation.PluginConfig;
 import com.eternalcode.economy.format.DecimalFormatter;
 import com.eternalcode.economy.multification.NoticeService;
 import java.math.BigDecimal;
@@ -23,6 +24,7 @@ public class WithdrawService {
     private final NoticeService noticeService;
     private final WithdrawItemService withdrawItemService;
     private final DecimalFormatter decimalFormatter;
+    private final PluginConfig pluginConfig;
     private final AccountPaymentService accountPaymentService;
     private final AccountManager accountManager;
 
@@ -30,6 +32,7 @@ public class WithdrawService {
         Server server,
         NoticeService noticeService,
         DecimalFormatter decimalFormatter,
+        PluginConfig pluginConfig,
         WithdrawItemService withdrawItemService,
         AccountPaymentService accountPaymentService,
         AccountManager accountManager
@@ -37,6 +40,7 @@ public class WithdrawService {
         this.server = server;
         this.noticeService = noticeService;
         this.decimalFormatter = decimalFormatter;
+        this.pluginConfig = pluginConfig;
         this.withdrawItemService = withdrawItemService;
         this.accountPaymentService = accountPaymentService;
         this.accountManager = accountManager;
@@ -95,7 +99,9 @@ public class WithdrawService {
 
         this.noticeService.create()
             .notice(messageConfig -> messageConfig.withdraw.banknoteWithdrawn)
-            .placeholder("{VALUE}", this.decimalFormatter.format(value))
+            .placeholder("{VALUE}", this.pluginConfig.withdraw.showExactValue
+                ? this.decimalFormatter.formatExact(value)
+                : this.decimalFormatter.format(value))
             .player(player.getUniqueId())
             .send();
     }
@@ -132,7 +138,9 @@ public class WithdrawService {
 
         this.noticeService.create()
             .notice(messageConfig -> messageConfig.withdraw.banknoteRedeemed)
-            .placeholder("{VALUE}", this.decimalFormatter.format(totalValue))
+            .placeholder("{VALUE}", this.pluginConfig.withdraw.showExactValue
+                ? this.decimalFormatter.formatExact(totalValue)
+                : this.decimalFormatter.format(totalValue))
             .player(player.getUniqueId())
             .send();
     }

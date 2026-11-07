@@ -109,7 +109,9 @@ public class WithdrawItemServiceImpl implements WithdrawItemService {
             throw new IllegalArgumentException("Banknote value must be positive, got: " + value);
         }
 
-        String formattedValue = this.moneyFormatter.format(value);
+        String formattedValue = this.pluginConfig.withdraw.showExactValue
+            ? this.moneyFormatter.formatExact(value)
+            : this.moneyFormatter.format(value);
         ItemStack itemStack = new ItemStack(configItem.material());
 
         itemStack.editMeta(meta -> {
