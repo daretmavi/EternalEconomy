@@ -3,6 +3,7 @@ package com.eternalcode.economy.withdraw;
 import com.cryptomorin.xseries.XEnchantment;
 import com.eternalcode.economy.config.implementation.PluginConfig;
 import com.eternalcode.economy.config.item.ConfigItem;
+import com.eternalcode.economy.config.item.ExactWithdrawItemEntry;
 import com.eternalcode.economy.config.item.WithdrawItemEntry;
 import com.eternalcode.economy.format.DecimalFormatter;
 import java.math.BigDecimal;
@@ -38,6 +39,8 @@ public class WithdrawItemServiceImpl implements WithdrawItemService {
 
     private volatile NavigableMap<BigDecimal, ConfigItem> cachedThresholdMap;
     private volatile List<WithdrawItemEntry> cachedEntries;
+    private volatile NavigableMap<BigDecimal, ConfigItem> cachedExactValueMap;
+    private volatile List<ExactWithdrawItemEntry> cachedExactEntries;
 
     public WithdrawItemServiceImpl(
         Plugin plugin,
@@ -54,13 +57,59 @@ public class WithdrawItemServiceImpl implements WithdrawItemService {
 
     @Override
     public ItemStack createBanknote(BigDecimal value, String creatorName) {
+        return this.createBanknote(value, creatorName, this.selectConfigItem(value));
+    }
+
+    @Override
+    public List<ItemStack> createBanknotes(BigDecimal value, String creatorName) {
+        if (this.pluginConfig.withdraw.multiItemEnabled || !this.pluginConfig.withdraw.exactItemEnabled) {
+            return List.of(this.createBanknote(value, creatorName));
+        }
+
+        NavigableMap<BigDecimal, ConfigItem> exactValueMap = this.getOrRebuildExactValueMap();
+        if (exactValueMap.isEmpty()) {
+            throw new IllegalStateException("Exact withdraw is enabled, but exactItemEntries is empty or invalid");
+        }
+
+        List<ItemStack> banknotes = new ArrayList<>();
+        BigDecimal remaining = value;
+
+        for (Map.Entry<BigDecimal, ConfigItem> entry : exactValueMap.descendingMap().entrySet()) {
+            BigDecimal denomination = entry.getKey();
+            int count = remaining.divideToIntegralValue(denomination).intValueExact();
+
+            if (count <= 0) {
+                continue;
+            }
+
+            remaining = remaining.subtract(denomination.multiply(BigDecimal.valueOf(count)));
+            ItemStack banknote = this.createBanknote(denomination, creatorName, entry.getValue());
+            int maxStackSize = banknote.getMaxStackSize();
+
+            while (count > 0) {
+                int stackAmount = Math.min(count, maxStackSize);
+                ItemStack stack = banknote.clone();
+                stack.setAmount(stackAmount);
+                banknotes.add(stack);
+                count -= stackAmount;
+            }
+        }
+
+        if (remaining.compareTo(BigDecimal.ZERO) != 0) {
+            throw new IllegalArgumentException(
+                "Withdraw amount cannot be represented by configured exact denominations: " + value
+            );
+        }
+
+        return banknotes;
+    }
+
+    private ItemStack createBanknote(BigDecimal value, String creatorName, ConfigItem configItem) {
         if (value.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Banknote value must be positive, got: " + value);
         }
 
-        ConfigItem configItem = this.selectConfigItem(value);
         String formattedValue = this.moneyFormatter.format(value);
-
         ItemStack itemStack = new ItemStack(configItem.material());
 
         itemStack.editMeta(meta -> {
@@ -101,6 +150,29 @@ public class WithdrawItemServiceImpl implements WithdrawItemService {
         });
 
         return itemStack;
+    }
+
+    private NavigableMap<BigDecimal, ConfigItem> getOrRebuildExactValueMap() {
+        List<ExactWithdrawItemEntry> entries = this.pluginConfig.withdraw.exactItemEntries;
+
+        if (this.cachedExactValueMap == null || this.cachedExactEntries != entries) {
+            NavigableMap<BigDecimal, ConfigItem> map = new TreeMap<>();
+
+            if (entries != null) {
+                for (ExactWithdrawItemEntry entry : entries) {
+                    if (entry.exactItemValue() != null
+                        && entry.exactItemValue().compareTo(BigDecimal.ZERO) > 0
+                        && entry.item() != null) {
+                        map.put(entry.exactItemValue(), entry.item());
+                    }
+                }
+            }
+
+            this.cachedExactValueMap = map;
+            this.cachedExactEntries = entries;
+        }
+
+        return this.cachedExactValueMap;
     }
 
     private String replaceBanknotePlaceholders(String text, String formattedValue, String creatorName) {
