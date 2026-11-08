@@ -91,12 +91,12 @@ public class PlayerUuidResolver {
 
         return luckPerms.getUserManager()
             .lookupUniqueId(playerName)
-            .handle((optionalUuid, throwable) -> {
-                if (throwable != null || optionalUuid.isEmpty()) {
+            .handle((uuid, throwable) -> {
+                if (throwable != null) {
                     return null;
                 }
 
-                return optionalUuid.get();
+                return uuid;
             });
     }
 }
