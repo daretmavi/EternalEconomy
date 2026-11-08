@@ -2,11 +2,11 @@ package com.eternalcode.economy.account;
 
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import net.luckperms.api.LuckPerms;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
@@ -83,44 +83,20 @@ public class PlayerUuidResolver {
     }
 
     private CompletableFuture<UUID> lookupLuckPerms(String playerName) {
-        try {
-            Class<?> luckPermsClass = Class.forName("net.luckperms.api.LuckPerms");
-            Object luckPerms = Bukkit.getServicesManager().load(luckPermsClass);
+        LuckPerms luckPerms = Bukkit.getServicesManager().load(LuckPerms.class);
 
-            if (luckPerms == null) {
-                return CompletableFuture.completedFuture(null);
-            }
+        if (luckPerms == null) {
+            return CompletableFuture.completedFuture(null);
+        }
 
-            Object userManager = luckPermsClass
-                .getMethod("getUserManager")
-                .invoke(luckPerms);
-
-            Class<?> userManagerClass = Class.forName(
-                "net.luckperms.api.model.user.UserManager"
-            );
-
-            Object result = userManagerClass
-                .getMethod("lookupUniqueId", String.class)
-                .invoke(userManager, playerName);
-
-            if (!(result instanceof CompletableFuture<?> future)) {
-                return CompletableFuture.completedFuture(null);
-            }
-
-            return future.handle((value, throwable) -> {
-                if (throwable != null || !(value instanceof Optional<?> optional)) {
+        return luckPerms.getUserManager()
+            .lookupUniqueId(playerName)
+            .handle((uuid, throwable) -> {
+                if (throwable != null) {
                     return null;
                 }
 
-                Object uuid = optional.orElse(null);
-                return uuid instanceof UUID found ? found : null;
+                return uuid;
             });
-        }
-        catch (ClassNotFoundException ignored) {
-            return CompletableFuture.completedFuture(null);
-        }
-        catch (ReflectiveOperationException exception) {
-            return CompletableFuture.completedFuture(null);
-        }
     }
 }
