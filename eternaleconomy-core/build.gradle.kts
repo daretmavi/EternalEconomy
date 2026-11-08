@@ -22,6 +22,10 @@ repositories {
         name = "papermc"
         url = uri("https://repo.papermc.io/repository/maven-public/")
     }
+    maven {
+        name = "luckperms"
+        url = uri("https://repo.lucko.me/")
+    }
 }
 
 dependencies {
@@ -30,6 +34,9 @@ dependencies {
 
     // paper-api
     compileOnly("io.papermc.paper:paper-api:${Versions.PAPER_API}")
+
+    // luckperms
+    compileOnly("net.luckperms:api:5.4")
 
     // eternalcode commons
     implementation("com.eternalcode:eternalcode-commons-adventure:${Versions.ETERNALCODE_COMMONS}") {
@@ -114,6 +121,11 @@ paper {
         }
 
         register("PlaceholderAPI") {
+            required = false
+            load = PaperPluginDescription.RelativeLoadOrder.BEFORE
+        }
+
+        register("LuckPerms") {
             required = false
             load = PaperPluginDescription.RelativeLoadOrder.BEFORE
         }
