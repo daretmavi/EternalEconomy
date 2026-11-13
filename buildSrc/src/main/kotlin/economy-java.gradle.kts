@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "com.eternalcode"
-version = "1.1.0-SNAPSHOT"
+version = "1.1.0-fork"
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(21))

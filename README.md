@@ -1,4 +1,4 @@
-<div align="center">
+ <div align="center">
 
 ![readme-banner.png](https://github.com/EternalCodeTeam/EternalEconomy/blob/master/assets/readme-banner.png?raw=true)
 
@@ -22,6 +22,33 @@
 # EternalEconomy
 
 > Modern economy plugin for Paper servers: balances, payments, banknotes, leaderboards and Vault integration in one clean package.
+
+## About This Fork
+
+This repository is a fork of **EternalEconomy**, based on version **1.1.0-SNAPSHOT** from [EternalCodeTeam/EternalEconomy](https://github.com/EternalCodeTeam/EternalEconomy).
+
+The fork builds upon the original plugin with additional account administration tools, improved player UUID resolution, more precise balance formatting and an extended banknote system.
+
+### Fork Features and Improvements
+
+- **Economy account administration** – Added commands to create and delete individual economy accounts, as well as clean up all accounts with a zero balance.
+- **Improved UUID resolution** – Player UUIDs can be resolved using locally available data, Mojang's API or optionally LuckPerms.
+- **Exact balance formatting** – Added configurable display of full monetary values instead of abbreviated numbers. This applies to balance displays, administrative messages and leaderboards.
+- **Exact banknote values** – Added an option to display the full banknote value in item names, lore and related messages.
+- **Custom withdrawal denominations** – Added configurable denominations that can be combined to represent a requested withdrawal amount exactly, including splitting amounts across multiple items.
+- **Improved account validation** – Enhanced account checks using player names and UUIDs, with clearer feedback when a player or account cannot be found.
+- **Banknote inventory fix** – Fixed an issue that prevented players from moving a banknote into their own inventory and improved anvil inventory interaction handling.
+
+The additional features are configurable where applicable and are intended to preserve the original plugin's behaviour by default.
+
+## Fork Highlights
+
+| Feature | What it gives you |
+| --- | --- |
+| Economy account management | Create, delete and clean up economy accounts using admin commands. |
+| UUID resolution | Resolve player UUIDs locally, through Mojang or optionally through LuckPerms. |
+| Exact balance display | Configurable full monetary values instead of abbreviated balances. |
+| Advanced banknotes | Exact denominations, custom denomination items and precise value display. |
 
 ## Highlights
 
